@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>tuCarent – Dataset Tables</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --border: #dde3ea;
+      --header-bg: #1a73e8;
+      --header-text: #ffffff;
+      --accent: #1a73e8;
+      --accent-light: #e8f0fe;
+      --text: #202124;
+      --text-muted: #5f6368;
+      --row-alt: #f8f9fa;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --pk: #e65100;
+      --fk: #6a1b9a;
+      --null: #9e9e9e;
+      --badge-null-bg: #f5f5f5;
+      --badge-null-col: #9e9e9e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .page-header {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: #fff;
+      padding: 28px 40px 22px;
+      box-shadow: 0 2px 12px rgba(26,115,232,0.25);
+    }
+    .page-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .page-header p {
+      font-size: 13px;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    /* NAV TABS */
+    .nav-tabs {
+      display: flex;
+      gap: 2px;
+      background: #fff;
+      border-bottom: 2px solid var(--border);
+      padding: 0 32px;
+      overflow-x: auto;
+      box-shadow: var(--shadow);
+    }
+    .nav-tab {
+      padding: 14px 22px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .nav-tab:hover { color: var(--accent); }
+    .nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 600;
+    }
+    .tab-badge {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 28px 32px 60px;
+    }
+
+    /* DATASET SECTION */
+    .dataset-section { display: none; }
+    .dataset-section.active { display: block; }
+
+    .section-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .section-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .section-meta h2 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .section-meta span {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--row-alt);
+      border: 1px solid var(--border);
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+
+    /* TABLE */
+    .table-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      background: #1a73e8;
+      color: #fff;
+      padding: 11px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+    }
+    thead th:first-child { border-radius: 0; }
+    tbody tr:nth-child(even) { background: var(--row-alt); }
+    tbody tr:hover { background: #e8f0fe99; }
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* cell types */
+    .cell-id {
+      font-weight: 700;
+      color: var(--pk);
+      font-family: monospace;
+    }
+    .cell-fk {
+      color: var(--fk);
+      font-family: monospace;
+      font-weight: 500;
+    }
+    .cell-null {
+      color: var(--null);
+      font-style: italic;
+      font-size: 11px;
+    }
+    .cell-num { font-family: monospace; }
+    .cell-date { color: #0d652d; font-family: monospace; font-size: 12px; }
+    .cell-hash {
+      font-family: monospace;
+      font-size: 11px;
+      color: #9e9e9e;
+      max-width: 180px;
+    }
+
+    /* badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-customer  { background: #e3f2fd; color: #0d47a1; }
+    .badge-chauffeur { background: #f3e5f5; color: #6a1b9a; }
+    .badge-admin     { background: #e8f5e9; color: #1b5e20; }
+    .badge-available { background: #e8f5e9; color: #1b5e20; }
+    .badge-assigned  { background: #fff3e0; color: #e65100; }
+    .badge-off_duty  { background: #fce4ec; color: #880e4f; }
+    .badge-pending   { background: #fff8e1; color: #f57f17; }
+    .badge-confirmed { background: #e8f5e9; color: #1b5e20; }
+    .badge-completed { background: #e3f2fd; color: #0d47a1; }
+    .badge-cancelled { background: #fce4ec; color: #880e4f; }
+    .badge-rented    { background: #f3e5f5; color: #6a1b9a; }
+    .badge-maintenance { background: #fce4ec; color: #880e4f; }
+    .badge-scheduled { background: #fff8e1; color: #f57f17; }
+    .badge-self-drive { background: #e8f5e9; color: #1b5e20; }
+    .badge-chauffeur-s { background: #f3e5f5; color: #6a1b9a; }
+
+    /* column headers colour-coded */
+    .th-pk  { background: #e65100 !important; }
+    .th-fk  { background: #6a1b9a !important; }
+
+    /* rating stars */
+    .star { color: #f9ab00; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🚗 tuCarent – Dataset Tables</h1>
+  <p>Live data extracted from <code>tucarent.db</code> · 6 tables · All records shown</p>
+</div>
+
+<!-- TABS -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="showTab('users',this)">👤 Users <span class="tab-badge">9</span></div>
+  <div class="nav-tab" onclick="showTab('vehicles',this)">🚘 Vehicles <span class="tab-badge">11</span></div>
+  <div class="nav-tab" onclick="showTab('chauffeurs',this)">🧑‍✈️ Chauffeurs <span class="tab-badge">5</span></div>
+  <div class="nav-tab" onclick="showTab('bookings',this)">📋 Bookings <span class="tab-badge">11</span></div>
+  <div class="nav-tab" onclick="showTab('maintenance',this)">🔧 Maintenance <span class="tab-badge">0</span></div>
+  <div class="nav-tab" onclick="showTab('reviews',this)">⭐ Reviews <span class="tab-badge">0</span></div>
+</div>
+
+<div class="content">
+
+  <!-- ══════════════ USERS ══════════════ -->
+  <div id="users" class="dataset-section active">
+    <div class="section-meta">
+      <div class="section-icon" style="background:#e8f0fe;">👤</div>
+      <h2>users</h2>
+      <span>9 records</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="th-pk">id</th>
+            <th>name</th>
+            <th>email</th>
+            <th>hashed_password</th>
+            <th>role</th>
+            <th>phone</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cell-id">1</td>
+            <td>chege joshua</td>
+            <td>chegej441@gmail.com</td>
+            <td class="cell-hash">$2b$12$vjaMyabVw8cN…</td>
+            <td><span class="badge badge-customer">customer</span></td>
+            <td class="cell-null">NULL</td>
+          </tr>
+          <tr>
+            <td class="cell-id">2</td>
+            <td>wafula james</td>
+            <td>wafulajames@gmail.com</td>
+            <td class="cell-hash">$2b$12$8G0eLoaL…</td>
+            <td><span class="badge badge-customer">customer</span></td>
+            <td class="cell-null">NULL</td>
+          </tr>
+          <tr>
+            <td class="cell-id">3</td>
+            <td>massive</td>
+            <td>massive@gmail.com</td>
+            <td class="cell-hash">$2b$12$LFxP5V8X…</td>
+            <td><span class="badge badge-customer">customer</span></td>
+            <td class="cell-null">NULL</td>
+          </tr>
+          <tr>
+            <td class="cell-id">4</td>
+            <td>Test Customer</td>
+            <td>customer@tucarent.com</td>
+            <td class="cell-hash">$2b$12$N.9yvyPW…</td>
+            <td><span class="badge badge-customer">customer</span></td>
+            <td>+254700000001</td>
+          </tr>
+          <tr>
+            <td class="cell-id">5</td>
+            <td>Test Chauffeur</td>
+            <td>chauffeur@tucarent.com</td>
+            <td class="cell-hash">$2b$12$8upF/h6N…</td>
+            <td><span class="badge badge-chauffeur">chauffeur</span></td>
+            <td>+254700000002</td>
+          </tr>
+          <tr>
+            <td class="cell-id">6</td>
+            <td>kibe</td>
+            <td>kibe@gmail.com</td>
+            <td class="cell-hash">$2b$12$YEgJIrZW…</td>
+            <td><span class="badge badge-customer">customer</span></td>
+            <td class="cell-null">NULL</td>
+          </tr>
+          <tr>
+            <td class="cell-id">7</td>
+            <td>kibz</td>
+            <td>kibz@gmail.com</td>
+            <td class="cell-hash">$2b$12$wAKlCQha…</td>
+            <td><span class="badge badge-customer">customer</span></td>
+            <td class="cell-null">NULL</td>
+          </tr>
+          <tr>
+            <td class="cell-id">8</td>
+            <td>Josh chege</td>
+            <td>chege@gmail.com</td>
+            <td class="cell-hash">$2b$12$bplIViw4…</td>
+            <td><span class="badge badge-chauffeur">chauffeur</span></td>
+            <td class="cell-null">NULL</td>
+          </tr>
+          <tr>
+            <td class="cell-id">9</td>
+            <td>Teresa</td>
+            <td>teresa@gmail.com</td>
+            <td class="cell-hash">$2b$12$U7.xxdcU…</td>
+            <td><span class="badge badge-chauffeur">chauffeur</span></td>
+            <td class="cell-null">NULL</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ VEHICLES ══════════════ -->
+  <div id="vehicles" class="dataset-section">
+    <div class="section-meta">
+      <div class="section-icon" style="background:#e8f5e9;">🚘</div>
+      <h2>vehicles</h2>
+      <span>11 records</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="th-pk">id</th>
+            <th>make</th>
+            <th>model</th>
+            <th>year</th>
+            <th>type</th>
+            <th>color</th>
+            <th>daily_rate ($)</th>
+            <th>mileage (km)</th>
+            <th>availability</th>
+            <th>accidents</th>
+            <th>service_records</th>
+            <th>rating</th>
+            <th>img</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cell-id">1</td><td>Toyota</td><td>Camry</td><td class="cell-num">2023</td><td>Sedan</td><td>Black</td><td class="cell-num">45.00</td><td class="cell-num">12,500</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 4.5</td><td>camry.jpg</td>
+          </tr>
+          <tr>
+            <td class="cell-id">2</td><td>BMW</td><td>X5</td><td class="cell-num">2022</td><td>SUV</td><td>Black</td><td class="cell-num">95.00</td><td class="cell-num">28,000</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 4.5</td><td>bmwx5.jpg</td>
+          </tr>
+          <tr>
+            <td class="cell-id">3</td><td>Tesla</td><td>Model 3</td><td class="cell-num">2024</td><td>Electric</td><td>White</td><td class="cell-num">135.00</td><td class="cell-num">5,200</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 4.8</td><td>teslamodel3.jpg</td>
+          </tr>
+          <tr>
+            <td class="cell-id">4</td><td>Porsche</td><td>911</td><td class="cell-num">2023</td><td>Sports</td><td>Red</td><td class="cell-num">350.00</td><td class="cell-num">22,000</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 4.9</td><td>porsche911.jpg</td>
+          </tr>
+          <tr>
+            <td class="cell-id">5</td><td>Mazda</td><td>Demio</td><td class="cell-num">2019</td><td>Economy</td><td>Blue</td><td class="cell-num">50.00</td><td class="cell-num">68,000</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 4.5</td><td>mazdademio.jpg</td>
+          </tr>
+          <tr>
+            <td class="cell-id">6</td><td>Nissan</td><td>Navara</td><td class="cell-num">2021</td><td>Trucks</td><td>Silver</td><td class="cell-num">100.00</td><td class="cell-num">45,000</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 4.2</td><td>nissannavara.jpg</td>
+          </tr>
+          <tr>
+            <td class="cell-id">7</td><td>Kia</td><td>Kia</td><td class="cell-num">2024</td><td>SUV</td><td>Black</td><td class="cell-num">39.00</td><td class="cell-num">20,000</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 0.0</td><td>nissannote.jpg</td>
+          </tr>
+          <tr>
+            <td class="cell-id">8</td><td>Mercedes-Benz</td><td>S-Class</td><td class="cell-num">2024</td><td>Luxury</td><td>Black</td><td class="cell-num">200.00</td><td class="cell-num">5,000</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 4.9</td><td>mercedesbenzsclass.jpg</td>
+          </tr>
+          <tr>
+            <td class="cell-id">9</td><td>BMW</td><td>i8</td><td class="cell-num">2023</td><td>Hybrid</td><td>Silver</td><td class="cell-num">180.00</td><td class="cell-num">15,000</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 4.8</td><td>bmw.jpg</td>
+          </tr>
+          <tr>
+            <td class="cell-id">10</td><td>Toyota</td><td>Hiace</td><td class="cell-num">2021</td><td>Vans/MPVs</td><td>White</td><td class="cell-num">80.00</td><td class="cell-num">120,000</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 4.3</td><td>toyotahiace.jpg</td>
+          </tr>
+          <tr>
+            <td class="cell-id">11</td><td>Ford</td><td>Mustang GT</td><td class="cell-num">2024</td><td>Sports</td><td>Midnight Blue</td><td class="cell-num">220.00</td><td class="cell-num">3,500</td><td><span class="badge badge-available">available</span></td><td class="cell-num">0</td><td class="cell-num">0</td><td>⭐ 0.0</td><td>fordmustang.jpg</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ CHAUFFEURS ══════════════ -->
+  <div id="chauffeurs" class="dataset-section">
+    <div class="section-meta">
+      <div class="section-icon" style="background:#f3e5f5;">🧑‍✈️</div>
+      <h2>chauffeurs</h2>
+      <span>5 records</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="th-pk">id</th>
+            <th class="th-fk">user_id (FK)</th>
+            <th>name</th>
+            <th>license_number</th>
+            <th>experience_years</th>
+            <th>daily_rate ($)</th>
+            <th>rating</th>
+            <th>status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cell-id">1</td>
+            <td class="cell-null">NULL</td>
+            <td>John Customer</td>
+            <td>CH-KE-888001</td>
+            <td class="cell-num">7</td>
+            <td class="cell-num">25.00</td>
+            <td>⭐ 4.6</td>
+            <td><span class="badge badge-available">available</span></td>
+          </tr>
+          <tr>
+            <td class="cell-id">2</td>
+            <td class="cell-null">NULL</td>
+            <td>Mary Driver</td>
+            <td>CH-KE-888002</td>
+            <td class="cell-num">4</td>
+            <td class="cell-num">20.00</td>
+            <td>⭐ 4.4</td>
+            <td><span class="badge badge-assigned">assigned</span></td>
+          </tr>
+          <tr>
+            <td class="cell-id">3</td>
+            <td class="cell-fk">5</td>
+            <td>Test Chauffeur</td>
+            <td>CH-KE-123456</td>
+            <td class="cell-num">5</td>
+            <td class="cell-num">25.00</td>
+            <td>⭐ 4.7</td>
+            <td><span class="badge badge-assigned">assigned</span></td>
+          </tr>
+          <tr>
+            <td class="cell-id">4</td>
+            <td class="cell-fk">8</td>
+            <td>Josh chege</td>
+            <td>12345</td>
+            <td class="cell-num">5</td>
+            <td class="cell-num">20.00</td>
+            <td>⭐ 0.0</td>
+            <td><span class="badge badge-available">available</span></td>
+          </tr>
+          <tr>
+            <td class="cell-id">5</td>
+            <td class="cell-fk">9</td>
+            <td>Teresa</td>
+            <td>QW1234</td>
+            <td class="cell-num">2</td>
+            <td class="cell-num">15.00</td>
+            <td>⭐ 0.0</td>
+            <td><span class="badge badge-available">available</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ BOOKINGS ══════════════ -->
+  <div id="bookings" class="dataset-section">
+    <div class="section-meta">
+      <div class="section-icon" style="background:#fff3e0;">📋</div>
+      <h2>bookings</h2>
+      <span>11 records</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="th-pk">id</th>
+            <th class="th-fk">user_id</th>
+            <th class="th-fk">vehicle_id</th>
+            <th class="th-fk">chauffeur_id</th>
+            <th>start_date</th>
+            <th>end_date</th>
+            <th>service_type</th>
+            <th>total_cost ($)</th>
+            <th>status</th>
+            <th>pickup_location</th>
+            <th>pickup_time</th>
+            <th>custom_color</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cell-id">2</td><td class="cell-fk">2</td><td class="cell-fk">3</td><td class="cell-null">NULL</td>
+            <td class="cell-date">2026-03-12</td><td class="cell-date">2026-03-14</td>
+            <td><span class="badge badge-self-drive">self-drive</span></td>
+            <td class="cell-num">170.00</td><td><span class="badge badge-pending">pending</span></td>
+            <td title="Ushirika Road, Karen Hardy…">Karen Hardy, Nairobi</td>
+            <td>10:30</td><td class="cell-null">NULL</td>
+          </tr>
+          <tr>
+            <td class="cell-id">3</td><td class="cell-fk">2</td><td class="cell-fk">2</td><td class="cell-fk">3</td>
+            <td class="cell-date">2026-03-10</td><td class="cell-date">2026-03-13</td>
+            <td><span class="badge badge-chauffeur-s">chauffeur</span></td>
+            <td class="cell-num">410.00</td><td><span class="badge badge-pending">pending</span></td>
+            <td>Kabuuma, Wakiso, Uganda</td>
+            <td>11:20</td><td>Blue</td>
+          </tr>
+          <tr>
+            <td class="cell-id">4</td><td class="cell-fk">2</td><td class="cell-fk">10</td><td class="cell-null">NULL</td>
+            <td class="cell-date">2026-03-19</td><td class="cell-date">2026-03-27</td>
+            <td><span class="badge badge-self-drive">self-drive</span></td>
+            <td class="cell-num">690.00</td><td><span class="badge badge-pending">pending</span></td>
+            <td>Kilimani, Westlands, Nairobi</td>
+            <td>09:40</td><td>Matte Black</td>
+          </tr>
+          <tr>
+            <td class="cell-id">5</td><td class="cell-fk">2</td><td class="cell-fk">5</td><td class="cell-fk">2</td>
+            <td class="cell-date">2026-03-10</td><td class="cell-date">2026-03-13</td>
+            <td><span class="badge badge-chauffeur-s">chauffeur</span></td>
+            <td class="cell-num">1,010.00</td><td><span class="badge badge-pending">pending</span></td>
+            <td>Tinderet Ave, Kileleshwa, Nairobi</td>
+            <td>19:56</td><td>Matte Black</td>
+          </tr>
+          <tr>
+            <td class="cell-id">6</td><td class="cell-fk">6</td><td class="cell-fk">3</td><td class="cell-null">NULL</td>
+            <td class="cell-date">2026-03-19</td><td class="cell-date">2026-03-20</td>
+            <td><span class="badge badge-self-drive">self-drive</span></td>
+            <td class="cell-num">135.00</td><td><span class="badge badge-pending">pending</span></td>
+            <td>Southern Bypass, Karen C, Nairobi</td>
+            <td>12:22</td><td>Matte Black</td>
+          </tr>
+          <tr>
+            <td class="cell-id">7</td><td class="cell-fk">6</td><td class="cell-fk">9</td><td class="cell-null">NULL</td>
+            <td class="cell-date">2026-03-27</td><td class="cell-date">2026-03-31</td>
+            <td><span class="badge badge-self-drive">self-drive</span></td>
+            <td class="cell-num">770.00</td><td><span class="badge badge-pending">pending</span></td>
+            <td>Lagiri Close, Adam's Arcade, Nairobi</td>
+            <td>19:56</td><td>Red</td>
+          </tr>
+          <tr>
+            <td class="cell-id">8</td><td class="cell-fk">7</td><td class="cell-fk">3</td><td class="cell-null">NULL</td>
+            <td class="cell-date">2026-04-03</td><td class="cell-date">2026-04-06</td>
+            <td><span class="badge badge-self-drive">self-drive</span></td>
+            <td class="cell-num">305.00</td><td><span class="badge badge-pending">pending</span></td>
+            <td>Nairobi Primary School, Mamlaka Rd</td>
+            <td>21:09</td><td>Red</td>
+          </tr>
+          <tr>
+            <td class="cell-id">9</td><td class="cell-fk">6</td><td class="cell-fk">2</td><td class="cell-fk">4</td>
+            <td class="cell-date">2026-04-14</td><td class="cell-date">2026-04-24</td>
+            <td><span class="badge badge-chauffeur-s">chauffeur</span></td>
+            <td class="cell-num">1,200.00</td><td><span class="badge badge-completed">completed</span></td>
+            <td>Total Wash, Mombasa Road, Nairobi</td>
+            <td>15:30</td><td>Red</td>
+          </tr>
+          <tr>
+            <td class="cell-id">10</td><td class="cell-fk">2</td><td class="cell-fk">1</td><td class="cell-null">NULL</td>
+            <td class="cell-date">2026-04-10</td><td class="cell-date">2026-04-13</td>
+            <td><span class="badge badge-self-drive">self-drive</span></td>
+            <td class="cell-num">185.00</td><td><span class="badge badge-pending">pending</span></td>
+            <td>View Park Towers, Utalii St, Nairobi</td>
+            <td>15:00</td><td>Matte Black</td>
+          </tr>
+          <tr>
+            <td class="cell-id">11</td><td class="cell-fk">6</td><td class="cell-fk">3</td><td class="cell-fk">5</td>
+            <td class="cell-date">2026-04-16</td><td class="cell-date">2026-04-25</td>
+            <td><span class="badge badge-chauffeur-s">chauffeur</span></td>
+            <td class="cell-num">950.00</td><td><span class="badge badge-completed">completed</span></td>
+            <td>-1.3142, 36.9233</td>
+            <td>18:50</td><td>Matte Black</td>
+          </tr>
+          <tr>
+            <td class="cell-id">12</td><td class="cell-fk">7</td><td class="cell-fk">2</td><td class="cell-null">NULL</td>
+            <td class="cell-date">2026-05-11</td><td class="cell-date">2026-05-21</td>
+            <td><span class="badge badge-self-drive">self-drive</span></td>
+            <td class="cell-num">1,000.00</td><td><span class="badge badge-pending">pending</span></td>
+            <td>-1.2836, 36.8096</td>
+            <td>16:30</td><td>White</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ MAINTENANCE ══════════════ -->
+  <div id="maintenance" class="dataset-section">
+    <div class="section-meta">
+      <div class="section-icon" style="background:#e8f5e9;">🔧</div>
+      <h2>maintenance</h2>
+      <span>0 records</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="th-pk">id</th>
+            <th class="th-fk">vehicle_id (FK)</th>
+            <th>date</th>
+            <th>description</th>
+            <th>cost ($)</th>
+            <th>status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="6" style="text-align:center;padding:28px;color:#9e9e9e;font-style:italic;">
+              No maintenance records found in database.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ REVIEWS ══════════════ -->
+  <div id="reviews" class="dataset-section">
+    <div class="section-meta">
+      <div class="section-icon" style="background:#fff8e1;">⭐</div>
+      <h2>reviews</h2>
+      <span>0 records</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th class="th-pk">id</th>
+            <th class="th-fk">booking_id (FK)</th>
+            <th>car_rating</th>
+            <th>chauffeur_rating</th>
+            <th>comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="5" style="text-align:center;padding:28px;color:#9e9e9e;font-style:italic;">
+              No reviews found in database.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+  function showTab(id, el) {
+    document.querySelectorAll('.dataset-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+- [x] Change ACCESS_TOKEN_EXPIRE_MINUTES from 60 to 1440 in backend/jwt.py to extend token expiry to 24 hours

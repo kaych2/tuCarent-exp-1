@@ -1,0 +1,19 @@
+/* frontend/src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base style for body to ensure dark mode works globally */
+body {
+  @apply bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-500;
+}
+
+/* Ensure pages start below the fixed navbar */
+main {
+  padding-top: 5rem; /* Adjust based on navbar height, which is 4rem (py-4) plus a little buffer */
+}
+
+/* Base link styling */
+a {
+  text-decoration: none;
+}
